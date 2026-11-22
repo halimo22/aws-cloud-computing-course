@@ -34,7 +34,7 @@ Everything that faces the internet sits in a public subnet; the private task is 
 - Full window, not a cropped fragment. The AWS region selector (or your terminal prompt) must be visible.
 - Your `lab5-<yourname>` prefix must be readable in each one.
 
-## Part 1: VPC, subnets and routing
+## Part 1: VPC, subnets and routing&#32;
 
 A **VPC** is your own private network inside AWS. You choose its IP range, split it into **subnets**, and decide where each subnet's traffic may go using **route tables**. A subnet is called *public* for one reason only: its route table sends `0.0.0.0/0` (all non-local traffic) to an **internet gateway**. Nothing else makes it public.
 
@@ -64,7 +64,7 @@ A **VPC** is your own private network inside AWS. You choose its IP range, split
 
 **Check yourself:** the `local` route cannot be deleted. It is how every subnet in a VPC reaches every other subnet.
 
-## Part 2: Security groups, EC2 and bastion SSH
+## Part 2: Security groups, EC2 and bastion SSH&#32;
 
 A **security group** is a stateful firewall attached to a network interface: you list what may come *in*, and replies to allowed traffic go back out automatically. You will launch one instance in each subnet. The public one acts as a **bastion** (jump host), the only way to reach the private one.
 
@@ -110,7 +110,7 @@ ssh -i ~/.ssh/lab5-<yourname>-key.pem \
 
 **Screenshot S8:** your terminal logged into the private instance through the bastion, after running `hostname -I` (it must show a `10.0.2.x` address).
 
-## Part 3: NAT gateway for the private subnet
+## Part 3: NAT gateway for the private subnet&#32;
 
 Right now the private instance cannot reach the internet at all, so it cannot even run `sudo dnf update`. A **NAT gateway** fixes that one way: instances in the private subnet can start connections *out* to the internet, but nothing on the internet can start a connection *in*. The NAT gateway lives in the **public** subnet and uses an **Elastic IP** as its public address; every private instance appears to the outside world as that one IP.
 
@@ -199,7 +199,7 @@ docker images
 docker push $REPO:v1
 ```
 
-In `docker images` both names show the **same IMAGE ID**: one image, two names. The Docker Hub image is published for both x86_64 and ARM64; CloudShell runs on x86_64, so it pulled and now pushes only the x86_64 version. Keep your task definition on X86_64.
+In `docker images` both names show the **same IMAGE ID**: one image, two names. The Docker Hub image is published for both x86\_64 and ARM64; CloudShell runs on x86\_64, so it pulled and now pushes only the x86\_64 version. Keep your task definition on X86\_64.
 
 4. Confirm the push from the AWS CLI:
 
@@ -226,7 +226,7 @@ A **task definition** is the recipe ECS follows to start your container: which i
 | --- | --- | --- |
 | Family name | `lab5-<yourname>-nginx` | Revisions are grouped under this name. |
 | Launch type | AWS Fargate | AWS runs the servers; you never see or patch them. |
-| OS / architecture | Linux / X86_64 | The image you pushed from CloudShell is the x86_64 version. |
+| OS / architecture | Linux / X86\_64 | The image you pushed from CloudShell is the x86\_64 version. |
 | Network mode | `awsvpc` (forced by Fargate) | Each task gets its own network interface, private IP and security group, like a tiny EC2 instance. |
 | CPU / memory | 0.25 vCPU / 0.5 GB | Enough for this small app and the cheapest Fargate size. |
 | Task execution role | `ecsTaskExecutionRole` | Used by **ECS itself** to pull the image from ECR and write logs. |
@@ -261,10 +261,10 @@ A **cluster** is a named group that tasks and services run in; with Fargate it i
 1. **EC2 > Security Groups > Create** `lab5-<yourname>-ecs-public-sg` in your VPC, inbound **HTTP (80) from My IP**.
 2. **ECS > Clusters > Create cluster** `lab5-<yourname>-cluster`, infrastructure **AWS Fargate** only.
 3. Open the cluster, **Services > Create**:
-    - Compute: launch type **Fargate**.
-    - Task definition: `lab5-<yourname>-nginx`, latest revision. Service name `lab5-<yourname>-web-public`, desired tasks **1**.
-    - Networking: your VPC, subnet **public-a** only, security group ecs-public-sg, **Public IP: turned on**.
-    - Load balancing: none.
+   - Compute: launch type **Fargate**.
+   - Task definition: `lab5-<yourname>-nginx`, latest revision. Service name `lab5-<yourname>-web-public`, desired tasks **1**.
+   - Networking: your VPC, subnet **public-a** only, security group ecs-public-sg, **Public IP: turned on**.
+   - Load balancing: none.
 4. Wait until the service's **Deployments** tab shows the rollout as *Completed* and *1/1 tasks running*.
 5. Open the running task, copy its **Public IP**, and browse to `http://<task-public-ip>/`.
 6. Open the task's **Logs** tab (or CloudWatch log group `/ecs/lab5-<yourname>-nginx`). You will see the variable list the app prints when it starts, then one access line per browser request.
@@ -275,9 +275,9 @@ A **cluster** is a named group that tasks and services run in; with Fargate it i
 
 **Screenshot S20:** the service page showing *Active*, 1/1 tasks running and the deployment *Completed*.
 
-**Screenshot S21:** the browser at the task's public IP showing the env-printer page with APP_ENV=lab5 and HOSTNAME=ip-10-0-1-x.ec2.internal, a name built from the task's private IP inside the VPC.
+**Screenshot S21:** the browser at the task's public IP showing the env-printer page with APP\_ENV=lab5 and HOSTNAME=ip-10-0-1-x.ec2.internal, a name built from the task's private IP inside the VPC.
 
-**Screenshot S22:** the task's log lines showing the start-up variable list (with APP_ENV=lab5) and your request (`GET / HTTP/1.1" 200`).
+**Screenshot S22:** the task's log lines showing the start-up variable list (with APP\_ENV=lab5) and your request (`GET / HTTP/1.1" 200`).
 
 ## Part 8: Private service behind a load balancer
 

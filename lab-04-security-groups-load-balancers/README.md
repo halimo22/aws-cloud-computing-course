@@ -330,10 +330,10 @@ Goal: one SG for the public ALB, and one for the private instances that trusts o
 Goal: two copies of each service, one in each AZ, with no public IP.
 
 1. Open **EC2 → Launch instances**. Launch four instances in total, using these settings:
-    - **AMI:** Amazon Linux 2023. **Type:** t3.micro. **Key pair:** proceed without one.
-    - **Network:** your VPC and the **private** subnet from the table below. **Auto-assign public IP: Disable.**
-    - **Security group:** select existing, then `<prefix>-app-sg` only.
-    - **Advanced details → User data:** paste the script below.
+   - **AMI:** Amazon Linux 2023. **Type:** t3.micro. **Key pair:** proceed without one.
+   - **Network:** your VPC and the **private** subnet from the table below. **Auto-assign public IP: Disable.**
+   - **Security group:** select existing, then `<prefix>-app-sg` only.
+   - **Advanced details → User data:** paste the script below.
 2. Name and place the instances like this:
 
 | Name | Service | Subnet |
@@ -532,6 +532,7 @@ An ALB is billed per hour while it exists, even with no traffic, so every studen
 2. **Both target groups.**
 3. **The four instances** (terminate them).
 4. **`app-sg`, then `alb-sg`.** `app-sg` references `alb-sg`, so `app-sg` goes first.
+
 - [ ] ALB deleted, and the Load Balancers list is empty for your prefix.
 - [ ] Instances show **Terminated**.
 - [ ] Both security groups are gone.
