@@ -734,3 +734,7 @@ One PDF with:
 2. The completed results table from Step 9.
 3. Screenshots of: `docker exec v1 cat /.env` printing the password, `ls -a /app` without it in Step 3, the 500 and its log line in Step 5 Part A, the visit counter at 3 in Step 5 Part B, and `docker ps` with one `healthy` and one `unhealthy` container in Step 6.
 4. Answers to the four questions in Part 1 and the discussion questions.
+
+### Next: the assignment
+
+The [Lab 6 assignment](assignment/) applies this lab to a three-tier app: a frontend, an API and a PostgreSQL database, connected with Docker networks and Compose, then pushed to ECR and run on ECS with RDS.

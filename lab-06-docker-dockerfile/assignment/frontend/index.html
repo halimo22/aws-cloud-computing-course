@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Notes</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; }
+    pre { background: #f3f3f3; padding: 0.75rem; overflow-x: auto; }
+    form { display: flex; gap: 0.5rem; }
+    input { flex: 1; padding: 0.4rem; }
+    .error { color: #b00020; }
+  </style>
+</head>
+<body>
+  <h1>Notes</h1>
+  <p>frontend (nginx) &rarr; backend (Flask) &rarr; db (PostgreSQL)</p>
+
+  <h2>Connection</h2>
+  <pre id="info">loading...</pre>
+
+  <h2>Messages</h2>
+  <form id="form">
+    <label for="text" hidden>Message</label>
+    <input id="text" maxlength="500" placeholder="Write a message" required>
+    <button>Add</button>
+  </form>
+  <p id="status" class="error" role="status"></p>
+  <ul id="messages"></ul>
+
+  <script>
+    // Relative URLs: the browser calls this same server, and nginx forwards /api/ to the backend.
+    const $ = (id) => document.getElementById(id);
+
+    async function api(path, options) {
+      const res = await fetch(path, options);
+      const body = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+      if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
+      return body;
+    }
+
+    async function load() {
+      $("status").textContent = "";
+      try {
+        $("info").textContent = JSON.stringify(await api("/api/info"), null, 2);
+        const list = await api("/api/messages");
+        $("messages").replaceChildren(...list.map((m) => {
+          const li = document.createElement("li");
+          li.textContent = `${m.text} (${new Date(m.created_at).toLocaleString()})`;
+          return li;
+        }));
+      } catch (e) {
+        $("status").textContent = e.message;
+      }
+    }
+
+    $("form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      try {
+        await api("/api/messages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: $("text").value }),
+        });
+        $("text").value = "";
+        load();
+      } catch (e) {
+        $("status").textContent = e.message;
+      }
+    });
+
+    load();
+  </script>
+</body>
+</html>
