@@ -1,0 +1,9 @@
+# Files that never belong in an image.
+.env
+*.env
+.git
+__pycache__/
+*.pyc
+.venv/
+Dockerfile*
+.dockerignore

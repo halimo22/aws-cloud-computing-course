@@ -9,6 +9,7 @@ Hands-on labs for the AWS cloud computing course. Each lab builds on the one bef
 | [Lab 4](lab-04-security-groups-load-balancers/) | Security groups, load balancers and microservices | Put two services (users and orders) behind one Application Load Balancer with path-based routing, lock the instances down with security groups, then break the system on purpose and read the 502, 503 and 504 errors. Console only. |
 | [Lab 5](lab-05-containers-ecr-ecs/) | IAM, containers, ECR and ECS | IAM users, roles and policies; what an artifact and a container image are; push an image to ECR and run it as an ECS Fargate service; configure it with environment variables. |
 | [Lab 5 assignment](lab-05-containers-ecr-ecs/assignment.md) | VPC, EC2, Docker and ECS end to end | Build a VPC with public and private subnets, SSH through a bastion, add a NAT gateway, push the `halimo1/env-printer` image to ECR from CloudShell, and run it on ECS twice: on a public IP, and privately behind an ALB with VPC endpoints. Submit one PDF with screenshots S1 to S27 and the written answers. |
+| [Lab 6](lab-06-docker-dockerfile/) | Docker and the Dockerfile | Containerize a small Python app: start from a bad Dockerfile, then fix it one instruction at a time (slim base, layer caching, `.dockerignore`, `ENV`/`ARG`, non-root `USER`, `VOLUME`, `HEALTHCHECK`, `CMD` vs `ENTRYPOINT`, multi-stage) and measure size and build time. Runs in CloudShell, no AWS cost. Best done before Lab 5. |
 
 ## Before you start
 
