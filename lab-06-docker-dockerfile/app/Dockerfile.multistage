@@ -1,9 +1,25 @@
-# Reference solution for Lab 6: single-stage build.
-# Copy this file and .dockerignore into app/, then:
-#   docker build -t dockerlab:single .
+# Reference solution for Lab 6: multi-stage build.
+# Build it from app/, next to .dockerignore:
+#   docker build -f Dockerfile.multistage -t dockerlab:multi .
 
-# FROM picks the base image. Every image starts from one.
-# slim = Debian with Python and little else (no compilers, no curl).
+# ---------- Stage 1: build ----------
+# FROM picks the base image and starts a stage. The full python image has
+# compilers and headers that some packages need to install. They stay here.
+FROM python:3.12 AS builder
+
+# WORKDIR sets the folder for every instruction after it (created if missing).
+WORKDIR /build
+
+# Copy only the dependency list, so the install layer below comes from the
+# cache until requirements.txt changes.
+COPY requirements.txt .
+
+# RUN executes a command at build time and saves the result as a new layer.
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+# ---------- Stage 2: runtime ----------
+# A new FROM starts a clean image. Nothing from the builder comes along
+# unless we copy it on purpose.
 FROM python:3.12-slim
 
 # ENV sets environment variables for later build steps and for the running
@@ -12,13 +28,15 @@ ENV GREETING="Hello from a container" \
     DATA_DIR=/data \
     PYTHONUNBUFFERED=1
 
-# WORKDIR sets the folder for every instruction after it (created if missing).
+# Take only the installed packages from the builder stage.
+COPY --from=builder /install /usr/local
+
 WORKDIR /app
 
-# Copy only the dependency list, so the install layer below comes from the
-# cache until requirements.txt changes.
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Create an unprivileged user, and a data folder that user can write to.
+RUN useradd --create-home --uid 10001 appuser \
+ && mkdir -p /data \
+ && chown appuser /data
 
 # The code changes most often, so it is copied last.
 # .dockerignore keeps secrets and junk out of this copy.
@@ -27,6 +45,8 @@ COPY . .
 # VOLUME marks /data as a mount point for data that must outlive the container.
 VOLUME /data
 
+# USER: every later instruction, and the running app, use this account.
+USER appuser
 
 # ARG is a build-time variable: docker build --build-arg APP_VERSION=1.1 .
 # It is gone after the build, so we copy it into an ENV. It sits late in the

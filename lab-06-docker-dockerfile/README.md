@@ -50,13 +50,16 @@ root user, secret inside, ~1.6 GB             non-root user, volume, healthcheck
 ```
 lab-06-docker-dockerfile/
   app/
-    app.py              the web app (Flask, served by gunicorn)
-    requirements.txt    its two dependencies
-  solution/
-    Dockerfile             final single-stage Dockerfile, every line commented
-    Dockerfile.multistage  final multi-stage Dockerfile, every line commented
+    app.py                 the web app (Flask, served by gunicorn)
+    requirements.txt       its two dependencies
+    Dockerfile             finished single-stage Dockerfile, every line commented
+    Dockerfile.multistage  finished multi-stage Dockerfile, every line commented
     .dockerignore          files kept out of the image
+    compose.yaml           sample Compose file: both images, the volume, and the port mappings
+  assignment/              the Lab 6 assignment
 ```
+
+Students move the four finished files aside before Step 1 (see "Before you start"), and write their own.
 
 **The app**
 
@@ -218,10 +221,12 @@ docker version
 ```bash
 git clone https://github.com/halimo22/aws-cloud-computing-course.git
 cd aws-cloud-computing-course/lab-06-docker-dockerfile/app
-ls
+mkdir ../finished
+mv Dockerfile Dockerfile.multistage .dockerignore compose.yaml ../finished/
+ls -a
 ```
 
-You should see `app.py` and `requirements.txt`. You write every Dockerfile in this folder. Each step replaces the previous `Dockerfile`.
+The folder comes with the finished files from the end of this lab. The `mv` puts them in `../finished`, so you build each step yourself. (A `.dockerignore` left here would hide the problem that Steps 1 and 2 show.) Now you should see only `app.py` and `requirements.txt`. You write every Dockerfile in this folder. Each step replaces the previous `Dockerfile`.
 
 4. Create a fake secret file, the kind a developer keeps next to the code:
 
@@ -370,6 +375,7 @@ __pycache__/
 .venv/
 Dockerfile*
 .dockerignore
+compose.yaml
 EOF
 ```
 
@@ -570,7 +576,7 @@ EOF
 | `--retries=3` | 3 failures in a row mark the container `unhealthy`. |
 | `CMD [...]` | The check itself. Exit code 0 is healthy. The slim image has no `curl`, so we use Python, which is already there. |
 
-This is the final single-stage Dockerfile. [solution/Dockerfile](solution/Dockerfile) is the same file with a comment on every line. Build and run it:
+This is the final single-stage Dockerfile. The finished copy, [app/Dockerfile](app/Dockerfile) in the repository (`../finished/Dockerfile` in your clone), is the same file with a comment on every line. Build and run it:
 
 ```bash
 docker build -t dockerlab:v6 .
@@ -627,10 +633,10 @@ docker run --rm dockerlab:v6 python -c "print('CMD replaced')"
 
 Goal: install with a full toolchain, and ship without it.
 
-Copy the multi-stage solution into your folder, read it, and build it:
+Copy the finished multi-stage Dockerfile back into your folder, read it, and build it:
 
 ```bash
-cp ../solution/Dockerfile.multistage .
+cp ../finished/Dockerfile.multistage .
 cat Dockerfile.multistage
 time docker build -f Dockerfile.multistage -t dockerlab:multi .
 docker images dockerlab
@@ -686,7 +692,7 @@ For reference, on one Apple Silicon laptop: `v1` was 1.63 GB with a 7-second reb
 
 - **Distroless:** change the runtime stage of the multi-stage build to a distroless Python image. What breaks? (There is no shell, so `RUN useradd` fails: use the image's built-in non-root user instead. Its Python version can also differ from the builder's, and installed packages must match the Python that runs them.)
 - **Build secrets:** read about `RUN --mount=type=secret`, which gives a build step a secret without storing it in any layer.
-- **Compose:** write a `compose.yaml` that runs this image with the `lab6-data` volume and the port mapping, so `docker compose up` replaces the long `docker run` command.
+- **Compose:** write a `compose.yaml` that runs this image with the `lab6-data` volume and the port mapping, so `docker compose up` replaces the long `docker run` command. [app/compose.yaml](app/compose.yaml) is a sample: copy it back with `cp ../finished/compose.yaml .` and run `docker compose up -d --build`. It runs both the single-stage and the multi-stage image, and its comments map each line to the `docker run` option it replaces.
 - **Push it:** tag `dockerlab:multi` with your ECR repository name and push it, as in Lab 5, Step 2.
 
 ### Troubleshooting

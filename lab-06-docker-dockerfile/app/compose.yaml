@@ -1,0 +1,46 @@
+# Sample Compose file for Lab 6. It replaces the docker run commands from the lab
+# with one file. It builds Dockerfile and Dockerfile.multistage from this folder.
+# Run everything from app/:
+#
+#   docker compose up -d --build     # build both images, create the volume and network, start
+#   docker compose ps                # STATUS and ports of each service
+#   curl localhost:8080              # web:  single-stage image, default greeting, version 1.0
+#   curl localhost:8081              # web2: multi-stage image, version 1.1, greeting from environment
+#   curl localhost:8080/visits       # the counter lives in the lab6-data volume
+#   docker compose logs web          # gunicorn's request log
+#
+#   # Services reach each other by service name, on the container port (8000, not 8081):
+#   docker compose exec web python -c "import urllib.request; print(urllib.request.urlopen('http://web2:8000').read().decode())"
+#
+#   docker compose down              # delete containers and network; the volume stays
+#   docker compose down -v           # delete the volume too
+
+services:
+  web:                                   # the service name is also its DNS name: web
+    build: .                             # docker build -t dockerlab:single .
+    image: dockerlab:single
+    ports:
+      - "8080:8000"                      # -p 8080:8000
+    volumes:
+      - lab6-data:/data                  # -v lab6-data:/data
+    restart: unless-stopped              # --restart unless-stopped
+
+  web2:
+    build:
+      context: .
+      dockerfile: Dockerfile.multistage  # -f Dockerfile.multistage
+      args:
+        APP_VERSION: "1.1"               # --build-arg APP_VERSION=1.1
+    image: dockerlab:multi
+    environment:
+      GREETING: Hi class                 # -e GREETING="Hi class" (overrides the ENV default)
+    ports:
+      - "8081:8000"
+    restart: unless-stopped
+
+# No networks: section. Compose creates one network for the project (app_default)
+# and attaches every service, so web and web2 find each other by name.
+
+volumes:
+  lab6-data:
+    name: lab6-data                      # the same volume as Step 5, not app_lab6-data

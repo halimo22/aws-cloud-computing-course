@@ -1,9 +1,9 @@
 cd lab-06-docker-dockerfile
 
 # ---------- Build ----------
-docker build -f solution/Dockerfile            -t dockerlab:single app
-docker build -f solution/Dockerfile.multistage -t dockerlab:multi  app
-docker build -f solution/Dockerfile -t dockerlab:1.1 --build-arg APP_VERSION=1.1 app   # ARG
+docker build                                -t dockerlab:single app
+docker build -f app/Dockerfile.multistage    -t dockerlab:multi  app
+docker build -t dockerlab:1.1 --build-arg APP_VERSION=1.1 app                      # ARG
 docker images dockerlab                                                               # compare sizes
 
 # ---------- Run ----------

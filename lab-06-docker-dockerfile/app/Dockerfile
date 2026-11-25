@@ -1,5 +1,5 @@
 # Reference solution for Lab 6: single-stage build.
-# Copy this file and .dockerignore into app/, then:
+# Build it from app/, next to .dockerignore:
 #   docker build -t dockerlab:single .
 
 # FROM picks the base image. Every image starts from one.
@@ -11,6 +11,12 @@ FROM python:3.12-slim
 ENV GREETING="Hello from a container" \
     DATA_DIR=/data \
     PYTHONUNBUFFERED=1
+
+# Create an unprivileged user, and a data folder that user can write to.
+# It never changes, so it sits early and stays cached.
+RUN useradd --create-home --uid 10001 appuser \
+ && mkdir -p /data \
+ && chown appuser /data
 
 # WORKDIR sets the folder for every instruction after it (created if missing).
 WORKDIR /app
@@ -27,6 +33,8 @@ COPY . .
 # VOLUME marks /data as a mount point for data that must outlive the container.
 VOLUME /data
 
+# USER: every later instruction, and the running app, use this account.
+USER appuser
 
 # ARG is a build-time variable: docker build --build-arg APP_VERSION=1.1 .
 # It is gone after the build, so we copy it into an ENV. It sits late in the
